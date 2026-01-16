@@ -1,0 +1,10 @@
+flask
+pandas
+langchain
+langchain-openai
+langchain-community
+faiss-cpu
+python-dotenv
+tiktoken
+openai
+groq
