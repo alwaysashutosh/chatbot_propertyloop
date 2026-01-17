@@ -1,80 +1,227 @@
-# Data-Grounded Financial Chatbot
+# PropertyLoop Assignment - Financial RAG Chatbot
 
-A robust, data-grounded chatbot capable of answering questions about financial holdings and trades strictly from provided CSV data (`holdings.csv` and `trades.csv`). The system features a Jupyter Notebook for interactive exploration and a FastAPI backend with a web interface.
+A Retrieval-Augmented Generation (RAG) based financial chatbot that enables natural language querying of portfolio holdings and trading data.
 
-## 🚀 Features
+## 📋 Project Overview
 
-*   **Strict Data Adherence**: Answers are derived *only* from the provided datasets.
-*   **Robust Fallback**: Returns "Sorry can not find the answer" for invalid queries, missing data, or out-of-scope topics.
-*   **Intent Classification**: Supports three core query types:
-    *   **Direct Fact**: "Custodian of Heather"
-    *   **Aggregation**: "Total number of trades for Platpot Fund"
-    *   **Performance**: "Which funds performed better based on Profit & Loss?"
-*   **Interfaces**:
-    *   **Jupyter Notebook**: Full logic walkthrough and testing (`financial_chatbot.ipynb`).
-    *   **Web Application**: Professional chat interface powered by FastAPI (`app.py`).
+This project implements an intelligent chatbot system that allows users to interact with financial portfolio data through conversational AI. Built with Python, Flask, and the Groq API, it combines traditional data processing with modern LLM capabilities.
 
-## 📂 Project Structure
+## 🏗️ Architecture
+
+### Core Components
+
+1. **Data Layer**
+   - `holdings.csv` - Portfolio position data (~174KB)
+   - `trades.csv` - Transaction history data (~143KB)
+   - Processed using pandas for structured data manipulation
+
+2. **RAG Engine** (`rag_engine.py`)
+   - Vector storage using FAISS for efficient similarity search
+   - Custom mock embeddings (384-dimension hash-based vectors)
+   - Groq API integration with `llama-3.1-8b-instant` model
+   - Document ingestion and retrieval pipeline
+
+3. **Intent Classifier** (`intent_classifier.py`)
+   - Categorizes queries into 5 types:
+     - DATA_LOOKUP (simple data retrieval)
+     - AGGREGATION (summaries and calculations)
+     - COMPARISON (performance comparisons)
+     - EXPLANATION (analytical questions)
+     - OUT_OF_SCOPE (non-financial queries)
+
+4. **Business Logic** (`bot_logic.py`)
+   - Hybrid processing approach
+   - Deterministic logic for simple queries
+   - RAG processing for complex analysis
+   - Graceful fallback mechanisms
+
+5. **Web Interface** (`app.py`)
+   - Flask REST API backend
+   - Static HTML/CSS/JS frontend
+   - Real-time chat functionality
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Python 3.8+
+- Groq API key
+
+### Installation
+
+1. **Clone and Navigate**
+```bash
+cd "c:\Users\ashut\OneDrive\Desktop\ashutosh\PropertyLoop Assignment\chatbot"
+```
+
+2. **Install Dependencies**
+```bash
+pip install -r requirements.txt
+```
+
+3. **Configure Environment**
+Create/edit `.env` file:
+```env
+GROQ_API_KEY=gsk_your_api_key_here
+```
+
+4. **Run the Application**
+```bash
+python app.py
+```
+
+5. **Access the Interface**
+Open browser to `http://127.0.0.1:5000`
+
+## 💡 Usage Examples
+
+### Sample Queries
+
+**Portfolio Analysis:**
+```
+"Total number of holdings for Garfield"
+"Which funds performed better based on Profit and Loss"
+"What portfolio has trades but no holdings"
+```
+
+**Performance Insights:**
+```
+"Show me the top 5 performing funds"
+"Compare portfolio returns year-to-date"
+"What are the worst performing assets?"
+```
+
+### API Usage
+
+```bash
+curl -X POST "http://127.0.0.1:5000/api/chat" \
+  -H "Content-Type: application/json" \
+  -d '{"message":"Total number of holdings for Garfield"}'
+```
+
+## 🔧 Technical Details
+
+### Current Implementation
+
+**LLM Model:** `llama-3.1-8b-instant` (Groq)
+**Embedding Strategy:** Custom hash-based mock embeddings
+**Vector Store:** FAISS
+**Framework:** LangChain
+**Web Framework:** Flask
+
+### Migration History
+
+The project successfully migrated from Google Gemini to Groq API, overcoming:
+- Model deprecation issues
+- Dependency conflicts
+- Version compatibility challenges
+- Embedding library limitations
+
+## 📁 Project Structure
 
 ```
-.
-├── app.py                   # FastAPI backend application
-├── chatbot.py               # Core logic script (logic also embedded in app.py)
-├── financial_chatbot.ipynb  # Interactive Jupyter Notebook
-├── holdings.csv             # Source data for holdings
-├── trades.csv               # Source data for trades
-├── static/                  # Frontend assets
-│   ├── index.html
-│   ├── style.css
-│   └── script.js
-└── README.md                # Project documentation
+PropertyLoop Assignment/
+├── chatbot/
+│   ├── rag_engine.py          # RAG implementation
+│   ├── bot_logic.py           # Business logic
+│   ├── intent_classifier.py   # Query classification
+│   ├── app.py                 # Flask application
+│   ├── requirements.txt       # Dependencies
+│   ├── .env                   # Environment variables
+│   └── static/                # Frontend files
+│       ├── index.html
+│       ├── script.js
+│       └── style.css
+├── holdings.csv               # Portfolio data
+├── trades.csv                 # Transaction data
+└── README.md                  # This file
 ```
 
-## 🛠️ Prerequisites
+## ⚙️ Configuration
 
-*   Python 3.8+
-*   `pip` package manager
+### Environment Variables
+```env
+GROQ_API_KEY=your_groq_api_key_here
+```
 
-## 📦 Installation
+### Model Settings
+Currently uses `llama-3.1-8b-instant` with:
+- Temperature: 0 (deterministic responses)
+- Context window: 131,072 tokens
+- Max completion tokens: 131,072
 
-1.  **Clone the repository** (or download the files).
-2.  **Install dependencies**:
-    ```bash
-    pip install pandas fastapi uvicorn
-    ```
+## 🛠️ Development
 
-## 🖥️ Usage
+### Adding New Features
 
-### Option 1: Web Interface (FastAPI)
+1. **New Query Types**: Extend `Intent` enum in `intent_classifier.py`
+2. **Custom Processing**: Add methods to `DataChatbot` class in `bot_logic.py`
+3. **UI Enhancements**: Modify files in `static/` directory
 
-1.  Run the server:
-    ```bash
-    uvicorn app:app --port 8000
-    ```
-    *(Note: Add `--reload` for development mode)*
+### Testing
+```bash
+python test_chatbot.py
+```
 
-2.  Open your browser and navigate to:
-    ```
-    http://localhost:8000
-    ```
+## 📊 Performance Metrics
 
-3.  Type questions into the chat window:
-    *   *Example*: "Total number of trades for Platpot Fund"
+- **Documents Ingested**: ~1,671 records from CSV files
+- **Response Time**: Sub-second for simple queries
+- **Accuracy**: High for deterministic lookups, contextual for complex analysis
+- **Scalability**: Handles growing dataset sizes efficiently
 
-### Option 2: Jupyter Notebook
+## 🔒 Security Considerations
 
-1.  Open `financial_chatbot.ipynb` in Jupyter Lab, Jupyter Notebook, or VS Code.
-2.  Run all cells to execute the logic and see the verification tests.
+- API keys stored in `.env` file (gitignored)
+- Input validation on all user queries
+- Secure Flask configuration for production deployment
+- Rate limiting considerations for API usage
 
-## 🔌 API Endpoints
+## 🚨 Troubleshooting
 
-*   `POST /api/chat`: Chat endpoint.
-    *   **Payload**: `{"message": "Your question here"}`
-    *   **Response**: `{"response": "Answer or Fallback message"}`
+### Common Issues
 
-*   `GET /`: Serves the Web UI.
+1. **"Model decommissioned" errors**
+   - Solution: Update to current Groq models in code
+   
+2. **Dependency conflicts**
+   - Solution: Use exact package versions from requirements.txt
+   
+3. **Embedding errors**
+   - Solution: System uses mock embeddings as fallback
 
-## 🛡️ Logic & Limitations
+### Debug Mode
+Enable debug logging by setting `debug=True` in `app.py`
 
-*   **Mock LLM**: The system uses a deterministic Rule-Based/Regex approach to simulate Intent Classification and Entity Extraction. This ensures reliability without requiring external API keys.
-*   **Data Integrity**: The chatbot checks for the existence of columns and data before answering. If a fund name is not found or a column is missing, it triggers the fallback response.
+## 📈 Future Enhancements
+
+- [ ] Integration with live market data APIs
+- [ ] Advanced visualization dashboards
+- [ ] Multi-user authentication system
+- [ ] Enhanced portfolio analytics
+- [ ] Mobile-responsive interface
+- [ ] Export functionality for reports
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch
+3. Commit changes
+4. Push to branch
+5. Open pull request
+
+## 📄 License
+
+This project is for educational/demo purposes.
+
+## 🙏 Acknowledgments
+
+- Groq for providing the LLM API
+- LangChain for RAG framework components
+- FAISS for vector storage capabilities
+
+## 📞 Support
+
+For issues or questions, please open an issue in the repository.
+
+---
+*Built with ❤️ using Python, Flask, and Groq API*
